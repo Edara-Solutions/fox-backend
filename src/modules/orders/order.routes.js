@@ -1,0 +1,18 @@
+const router = require("express").Router();
+const controller = require("./order.controller");
+const validation = require("./order.validation");
+const validate = require("../../middlewares/validation.middleware");
+const customerAuth = require("../../middlewares/customerAuth.middleware");
+const userAuth = require("../../middlewares/userAuth.middleware");
+const roles = require("../../middlewares/role.middleware");
+const USER_ROLES = require("../../constants/roles");
+
+const orderStaff = roles(USER_ROLES.ORDER_MANAGER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN);
+router.post("/", customerAuth, validate(validation.create), controller.create);
+router.get("/my-orders", customerAuth, controller.myOrders);
+router.get("/my-orders/:id", customerAuth, validate(validation.idParam), controller.myOrder);
+router.patch("/my-orders/:id/cancel", customerAuth, validate(validation.idParam), controller.cancelMine);
+router.get("/", userAuth, orderStaff, controller.list);
+router.get("/:id", userAuth, orderStaff, validate(validation.idParam), controller.get);
+router.patch("/:id/status", userAuth, orderStaff, validate(validation.updateStatus), controller.updateStatus);
+module.exports = router;
