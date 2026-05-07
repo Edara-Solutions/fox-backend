@@ -9,6 +9,40 @@ const { validateCoupon, incrementCouponUsage } = require("../coupons/coupon.serv
 
 const makeOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
 
+const deductOrderStock = async (order) => {
+  if (order.stockDeducted) return;
+
+  const deductedItems = [];
+  for (const item of order.items) {
+    const product = await Product.findOneAndUpdate(
+      { _id: item.product, stock: { $gte: item.quantity } },
+      { $inc: { stock: -item.quantity } },
+      { new: true }
+    );
+
+    if (!product) {
+      for (const deductedItem of deductedItems) {
+        await Product.findByIdAndUpdate(deductedItem.product, { $inc: { stock: deductedItem.quantity } });
+      }
+      throw new ApiError(400, `Not enough stock for ${item.name}`);
+    }
+
+    deductedItems.push(item);
+  }
+
+  order.stockDeducted = true;
+};
+
+const restoreOrderStock = async (order) => {
+  if (!order.stockDeducted) return;
+
+  for (const item of order.items) {
+    await Product.findByIdAndUpdate(item.product, { $inc: { stock: item.quantity } });
+  }
+
+  order.stockDeducted = false;
+};
+
 const createOrder = async (customerId, payload) => {
   const cart = await Cart.findOne({ customer: customerId });
   if (!cart || cart.items.length === 0) throw new ApiError(400, "Cart is empty");
@@ -63,4 +97,57 @@ const createOrder = async (customerId, payload) => {
   return order;
 };
 
-module.exports = { createOrder };
+const updateOrderStatus = async (orderId, orderStatus) => {
+  const order = await Order.findById(orderId);
+  if (!order) throw new ApiError(404, "Order not found");
+
+  if (orderStatus === ORDER_STATUS.CONFIRMED) {
+    await deductOrderStock(order);
+    order.paymentStatus = PAYMENT_STATUS.PAID;
+    order.paidAt = order.paidAt || new Date();
+    order.confirmedAt = order.confirmedAt || new Date();
+    await Payment.findOneAndUpdate({ order: order._id }, { status: PAYMENT_STATUS.PAID });
+  }
+
+  if (orderStatus === ORDER_STATUS.CANCELLED) {
+    await restoreOrderStock(order);
+    order.cancelledAt = order.cancelledAt || new Date();
+  }
+
+  if (orderStatus === ORDER_STATUS.REFUNDED) {
+    await restoreOrderStock(order);
+    order.paymentStatus = PAYMENT_STATUS.REFUNDED;
+    order.refundedAt = order.refundedAt || new Date();
+    await Payment.findOneAndUpdate({ order: order._id }, { status: PAYMENT_STATUS.REFUNDED });
+  }
+
+  if (orderStatus === ORDER_STATUS.DELIVERED) {
+    order.deliveredAt = order.deliveredAt || new Date();
+  }
+
+  order.orderStatus = orderStatus;
+  await order.save();
+  await order.populate([
+    { path: "customer", select: "fullName email phone" },
+    { path: "vendor", select: "name email role" },
+    { path: "payment" },
+  ]);
+  return order;
+};
+
+const cancelCustomerOrder = async (customerId, orderId) => {
+  const order = await Order.findOne({ _id: orderId, customer: customerId });
+  if (!order) throw new ApiError(404, "Order not found");
+  if (order.orderStatus !== ORDER_STATUS.PENDING_PAYMENT) throw new ApiError(400, "Order cannot be cancelled now");
+
+  order.orderStatus = ORDER_STATUS.CANCELLED;
+  order.cancelledAt = order.cancelledAt || new Date();
+  await order.save();
+  await order.populate([
+    { path: "vendor", select: "name email role" },
+    { path: "payment" },
+  ]);
+  return order;
+};
+
+module.exports = { createOrder, deductOrderStock, restoreOrderStock, updateOrderStatus, cancelCustomerOrder };

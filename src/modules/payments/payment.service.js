@@ -1,6 +1,6 @@
 const Payment = require("./payment.model");
 const Order = require("../orders/order.model");
-const Product = require("../products/product.model");
+const { deductOrderStock } = require("../orders/order.service");
 const ApiError = require("../../utils/ApiError");
 const getPaymentInstructions = require("../../utils/paymentInstructions");
 const PAYMENT_STATUS = require("../../constants/paymentStatus");
@@ -34,13 +34,8 @@ exports.approve = async (paymentId, reviewerId) => {
   if (payment.status !== PAYMENT_STATUS.AWAITING_REVIEW) throw new ApiError(400, "Payment is not awaiting review");
 
   const order = await Order.findById(payment.order);
-  for (const item of order.items) {
-    const product = await Product.findById(item.product);
-    if (!product || product.stock < item.quantity) throw new ApiError(400, `Not enough stock for ${item.name}`);
-  }
-  for (const item of order.items) {
-    await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
-  }
+  if (!order) throw new ApiError(404, "Order not found");
+  await deductOrderStock(order);
 
   payment.status = PAYMENT_STATUS.PAID;
   payment.reviewedBy = reviewerId;

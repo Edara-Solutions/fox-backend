@@ -36,6 +36,8 @@ const orderSchema = new mongoose.Schema(
     confirmedAt: Date,
     deliveredAt: Date,
     cancelledAt: Date,
+    refundedAt: Date,
+    stockDeducted: { type: Boolean, default: false },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
