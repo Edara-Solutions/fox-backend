@@ -37,7 +37,14 @@ const orderSchema = new mongoose.Schema(
     deliveredAt: Date,
     cancelledAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+orderSchema.virtual("payment", {
+  ref: "Payment",
+  localField: "_id",
+  foreignField: "order",
+  justOne: true,
+});
 
 module.exports = mongoose.model("Order", orderSchema);

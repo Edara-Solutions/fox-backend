@@ -58,6 +58,7 @@ const createOrder = async (customerId, payload) => {
   cart.items = [];
   cart.recalculate();
   await cart.save();
+  await order.populate("payment");
   return order;
 };
 
