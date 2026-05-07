@@ -37,6 +37,8 @@ exports.getCoupon = async (id) => Coupon.findById(id).populate("vendor", VENDOR_
 
 exports.getMyCoupons = async (vendorId) => Coupon.find({vendor: vendorId}).populate("vendor", VENDOR_FIELDS);
 
+exports.incrementCouponUsage = async (couponId) => Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: 1 } });
+
 exports.updateCoupon = async (id, payload) => {
   if (payload.vendor) await ensureActiveVendor(payload.vendor);
   if (payload.code) payload.code = payload.code.toUpperCase();

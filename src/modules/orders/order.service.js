@@ -5,7 +5,7 @@ const Product = require("../products/product.model");
 const ApiError = require("../../utils/ApiError");
 const PAYMENT_STATUS = require("../../constants/paymentStatus");
 const ORDER_STATUS = require("../../constants/orderStatus");
-const { validateCoupon } = require("../coupons/coupon.service");
+const { validateCoupon, incrementCouponUsage } = require("../coupons/coupon.service");
 
 const makeOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
 
@@ -55,6 +55,7 @@ const createOrder = async (customerId, payload) => {
     orderStatus: ORDER_STATUS.PENDING_PAYMENT,
   });
   await Payment.create({ order: order._id, customer: customerId, method: payload.paymentMethod, amount: total });
+  if (validatedCoupon) await incrementCouponUsage(validatedCoupon.coupon._id);
   cart.items = [];
   cart.recalculate();
   await cart.save();
