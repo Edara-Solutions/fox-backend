@@ -1,5 +1,13 @@
 const Coupon = require("./coupon.model");
+const User = require("../users/user.model");
 const ApiError = require("../../utils/ApiError");
+
+const VENDOR_FIELDS = "name email role";
+
+const ensureActiveVendor = async (vendorId) => {
+  const vendor = await User.findOne({ _id: vendorId, isActive: true });
+  if (!vendor) throw new ApiError(400, "Vendor must be an active user");
+};
 
 const calculateDiscount = (coupon, orderTotal) => {
   if (coupon.type === "free_shipping") return 0;
@@ -16,4 +24,21 @@ exports.validateCoupon = async ({ code, orderTotal }) => {
   if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) throw new ApiError(400, "Coupon usage limit reached");
   if (orderTotal < coupon.minOrderAmount) throw new ApiError(400, "Order total is below coupon minimum");
   return { coupon, discount: calculateDiscount(coupon, orderTotal), freeShipping: coupon.type === "free_shipping" };
+};
+
+exports.createCoupon = async (payload) => {
+  await ensureActiveVendor(payload.vendor);
+  return Coupon.create({ ...payload, code: payload.code.toUpperCase() });
+};
+
+exports.listCoupons = async () => Coupon.find().populate("vendor", VENDOR_FIELDS).sort("-createdAt");
+
+exports.getCoupon = async (id) => Coupon.findById(id).populate("vendor", VENDOR_FIELDS);
+
+exports.getMyCoupons = async (vendorId) => Coupon.find({vendor: vendorId}).populate("vendor", VENDOR_FIELDS);
+
+exports.updateCoupon = async (id, payload) => {
+  if (payload.vendor) await ensureActiveVendor(payload.vendor);
+  if (payload.code) payload.code = payload.code.toUpperCase();
+  return Coupon.findByIdAndUpdate(id, payload, { new: true }).populate("vendor", VENDOR_FIELDS);
 };
