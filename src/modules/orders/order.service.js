@@ -5,6 +5,7 @@ const Product = require("../products/product.model");
 const ApiError = require("../../utils/ApiError");
 const PAYMENT_STATUS = require("../../constants/paymentStatus");
 const ORDER_STATUS = require("../../constants/orderStatus");
+const { validateCoupon } = require("../coupons/coupon.service");
 
 const makeOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
 
@@ -19,9 +20,12 @@ const createOrder = async (customerId, payload) => {
     if (product.stock < item.quantity) throw new ApiError(400, `${item.name} does not have enough stock`);
     productSnapshots.set(item.product.toString(), product);
   }
-
   const shippingFee = payload.shippingFee || 0;
-  const discount = 0;
+  const validatedCoupon = payload.couponCode
+    ? await validateCoupon({ code: payload.couponCode, orderTotal: cart.subtotal })
+    : null;
+  const discount = validatedCoupon ? validatedCoupon.discount : 0;
+  const vendor = validatedCoupon ? validatedCoupon.coupon.vendor : null;
   const total = cart.subtotal + shippingFee - discount;
   const order = await Order.create({
     orderNumber: makeOrderNumber(),
@@ -43,6 +47,7 @@ const createOrder = async (customerId, payload) => {
     shippingFee,
     total,
     couponCode: payload.couponCode,
+    vendor,
     paymentMethod: payload.paymentMethod,
     shippingAddress: payload.shippingAddress,
     notes: payload.notes,

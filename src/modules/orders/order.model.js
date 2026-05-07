@@ -26,6 +26,7 @@ const orderSchema = new mongoose.Schema(
     shippingFee: { type: Number, default: 0 },
     total: { type: Number, required: true },
     couponCode: String,
+    vendor: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     paymentMethod: { type: String, enum: Object.values(PAYMENT_METHODS), required: true },
     paymentStatus: { type: String, enum: Object.values(PAYMENT_STATUS), default: PAYMENT_STATUS.PENDING },
     orderStatus: { type: String, enum: Object.values(ORDER_STATUS), default: ORDER_STATUS.PENDING_PAYMENT },
