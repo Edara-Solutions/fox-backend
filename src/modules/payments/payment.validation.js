@@ -6,10 +6,10 @@ module.exports = {
   proof: z.object({
     params: z.object({ orderId: objectId }),
     body: z.object({
-      transactionReference: z.string().min(2),
+      transactionReference: z.string().min(2).optional(),
       senderPhone: z.string().min(7).optional(),
       senderName: z.string().min(2).optional(),
-      paidAmount: z.coerce.number().min(0),
+      paidAmount: z.coerce.number().min(0).optional(),
     }),
   }),
   idParam: z.object({ params: z.object({ id: objectId }) }),
