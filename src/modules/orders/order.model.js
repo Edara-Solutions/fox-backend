@@ -30,7 +30,7 @@ const orderSchema = new mongoose.Schema(
     paymentMethod: { type: String, enum: Object.values(PAYMENT_METHODS), required: true },
     paymentStatus: { type: String, enum: Object.values(PAYMENT_STATUS), default: PAYMENT_STATUS.PENDING },
     orderStatus: { type: String, enum: Object.values(ORDER_STATUS), default: ORDER_STATUS.PENDING_PAYMENT },
-    shippingAddress: { type: mongoose.Schema.Types.Mixed, required: true },
+    shippingDetails: { type: mongoose.Schema.Types.Mixed, required: true },
     notes: String,
     paidAt: Date,
     confirmedAt: Date,

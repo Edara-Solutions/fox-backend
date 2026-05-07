@@ -49,7 +49,7 @@ const createOrder = async (customerId, payload) => {
     couponCode: payload.couponCode,
     vendor,
     paymentMethod: payload.paymentMethod,
-    shippingAddress: payload.shippingAddress,
+    shippingDetails: payload.shippingDetails,
     notes: payload.notes,
     paymentStatus: PAYMENT_STATUS.PENDING,
     orderStatus: ORDER_STATUS.PENDING_PAYMENT,

@@ -6,7 +6,7 @@ const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/);
 module.exports = {
   create: z.object({
     body: z.object({
-      shippingAddress: z.record(z.string(), z.any()),
+      shippingDetails: z.record(z.string(), z.any()),
       paymentMethod: z.enum(Object.values(PAYMENT_METHODS)),
       couponCode: z.string().optional(),
       notes: z.string().optional(),
