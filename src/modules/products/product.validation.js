@@ -1,5 +1,6 @@
 const { z } = require("zod");
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/);
+const booleanValue = z.union([z.boolean(), z.enum(["true", "false"])]);
 
 const body = z.object({
   name: z.string().min(2),
@@ -21,8 +22,9 @@ const body = z.object({
   warnings: z.string().optional(),
   usageInstructions: z.string().optional(),
   expiryDate: z.coerce.date().optional(),
-  isActive: z.boolean().optional(),
-  isFeatured: z.boolean().optional(),
+  isActive: booleanValue.optional(),
+  isFeatured: booleanValue.optional(),
+  isStack: booleanValue.optional(),
 });
 
 module.exports = {

@@ -24,6 +24,7 @@ const productSchema = new mongoose.Schema(
     expiryDate: Date,
     isActive: { type: Boolean, default: true },
     isFeatured: { type: Boolean, default: false },
+    isStack: { type: Boolean, default: false },
     averageRating: { type: Number, default: 0 },
     reviewsCount: { type: Number, default: 0 },
   },
