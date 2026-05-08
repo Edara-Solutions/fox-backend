@@ -2,12 +2,22 @@ const Cart = require("../cart/cart.model");
 const Order = require("./order.model");
 const Payment = require("../payments/payment.model");
 const Product = require("../products/product.model");
+const User = require("../users/user.model");
 const ApiError = require("../../utils/ApiError");
 const PAYMENT_STATUS = require("../../constants/paymentStatus");
 const ORDER_STATUS = require("../../constants/orderStatus");
+const USER_ROLES = require("../../constants/roles");
 const { validateCoupon, incrementCouponUsage } = require("../coupons/coupon.service");
 
 const makeOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
+const orderPopulate = [
+  { path: "customer", select: "fullName email phone" },
+  { path: "vendor", select: "name email role" },
+  { path: "assignedTo", select: "name email role" },
+  { path: "assignedBy", select: "name email role" },
+  { path: "payment" },
+];
+const assignableRoles = [USER_ROLES.ORDER_MANAGER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN];
 
 const deductOrderStock = async (order) => {
   if (order.stockDeducted) return;
@@ -128,9 +138,7 @@ const updateOrderStatus = async (orderId, orderStatus) => {
   order.orderStatus = orderStatus;
   await order.save();
   await order.populate([
-    { path: "customer", select: "fullName email phone" },
-    { path: "vendor", select: "name email role" },
-    { path: "payment" },
+    ...orderPopulate,
   ]);
   return order;
 };
@@ -145,9 +153,28 @@ const cancelCustomerOrder = async (customerId, orderId) => {
   await order.save();
   await order.populate([
     { path: "vendor", select: "name email role" },
+    { path: "assignedTo", select: "name email role" },
+    { path: "assignedBy", select: "name email role" },
     { path: "payment" },
   ]);
   return order;
 };
 
-module.exports = { createOrder, deductOrderStock, restoreOrderStock, updateOrderStatus, cancelCustomerOrder };
+const assignOrder = async (orderId, assignedTo, assignedBy) => {
+  const assignee = await User.findOne({ _id: assignedTo, isActive: true, role: { $in: assignableRoles } });
+  if (!assignee) throw new ApiError(400, "Assigned user must be an active order staff user");
+
+  const order = await Order.findById(orderId);
+  if (!order) throw new ApiError(404, "Order not found");
+
+  order.assignedTo = assignee._id;
+  order.assignedBy = assignedBy;
+  order.assignedAt = new Date();
+  await order.save();
+  await order.populate(orderPopulate);
+  return order;
+};
+
+const listAssignedOrders = async (userId) => Order.find({ assignedTo: userId }).populate(orderPopulate).sort("-createdAt");
+
+module.exports = { createOrder, deductOrderStock, restoreOrderStock, updateOrderStatus, cancelCustomerOrder, assignOrder, listAssignedOrders };

@@ -14,5 +14,6 @@ module.exports = {
     }),
   }),
   updateStatus: z.object({ params: z.object({ id: objectId }), body: z.object({ orderStatus: z.enum(Object.values(ORDER_STATUS)) }) }),
+  assign: z.object({ params: z.object({ id: objectId }), body: z.object({ assignedTo: objectId }) }),
   idParam: z.object({ params: z.object({ id: objectId }) }),
 };
