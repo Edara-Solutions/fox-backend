@@ -761,8 +761,7 @@ Minimum body:
 ```json
 {
   "code": "SAVE10",
-  "type": "percentage",
-  "vendor": "64f000000000000000000001"
+  "type": "percentage"
 }
 ```
 
@@ -777,6 +776,7 @@ Optional body:
   "expiresAt": "2026-06-01",
   "usageLimit": 100,
   "isActive": true,
+  "vendor": "64f000000000000000000001",
   "applicableCategories": ["64f000000000000000000001"],
   "applicableProducts": ["64f000000000000000000002"]
 }
@@ -784,7 +784,8 @@ Optional body:
 
 Notes:
 
-- `vendor` must be an active internal user.
+- `vendor` is optional and can be omitted or set to `null`.
+- If `vendor` is provided, it must be an active internal user.
 - Coupon codes are stored uppercase.
 - `usedCount` increments only when an order is created with the coupon.
 

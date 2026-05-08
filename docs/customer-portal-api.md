@@ -790,4 +790,4 @@ Response:
 - Product stock is deducted only after payment approval by internal staff.
 - If a paid/confirmed order is later cancelled or refunded by staff, stock is restored once.
 - Orders include related `payment` data when available.
-- Orders with coupons include `vendor` metadata from the coupon.
+- Orders with coupons include `vendor` metadata from the coupon when the coupon has a vendor; otherwise order `vendor` is `null`.
