@@ -3,6 +3,7 @@ const Category = require("../categories/category.model");
 const Brand = require("../brands/brand.model");
 const ApiError = require("../../utils/ApiError");
 const slugifyText = require("../../utils/slugifyText");
+const { paginationOptions } = require("../../utils/pagination");
 
 const ensureRefs = async ({ category, brand }) => {
   if (category && !(await Category.exists({ _id: category }))) throw new ApiError(404, "Category not found");
@@ -31,10 +32,9 @@ exports.list = async (query) => {
   if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
   if (query.search) filter.$text ? null : (filter.name = new RegExp(query.search, "i"));
 
-  const page = Math.max(Number(query.page) || 1, 1);
-  const limit = Math.min(Math.max(Number(query.limit) || 12, 1), 100);
+  const { page, limit, skip } = paginationOptions(query);
   const sort = query.sort || "-createdAt";
-  const products = await Product.find(filter).populate("brand category").sort(sort).skip((page - 1) * limit).limit(limit);
+  const products = await Product.find(filter).populate("brand category").sort(sort).skip(skip).limit(limit);
   const total = await Product.countDocuments(filter);
   return { products, pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
 };

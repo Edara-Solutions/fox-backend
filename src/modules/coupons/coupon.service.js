@@ -1,6 +1,7 @@
 const Coupon = require("./coupon.model");
 const User = require("../users/user.model");
 const ApiError = require("../../utils/ApiError");
+const { paginate } = require("../../utils/pagination");
 
 const VENDOR_FIELDS = "name email role";
 
@@ -31,11 +32,18 @@ exports.createCoupon = async (payload) => {
   return Coupon.create({ ...payload, code: payload.code.toUpperCase() });
 };
 
-exports.listCoupons = async () => Coupon.find().populate("vendor", VENDOR_FIELDS).sort("-createdAt");
+exports.listCoupons = async (query) => {
+  const { documents: coupons, pagination } = await paginate(Coupon.find().populate("vendor", VENDOR_FIELDS).sort("-createdAt"), Coupon.countDocuments(), query);
+  return { coupons, pagination };
+};
 
 exports.getCoupon = async (id) => Coupon.findById(id).populate("vendor", VENDOR_FIELDS);
 
-exports.getMyCoupons = async (vendorId) => Coupon.find({vendor: vendorId}).populate("vendor", VENDOR_FIELDS);
+exports.getMyCoupons = async (vendorId, query) => {
+  const filter = { vendor: vendorId };
+  const { documents: coupons, pagination } = await paginate(Coupon.find(filter).populate("vendor", VENDOR_FIELDS).sort("-createdAt"), Coupon.countDocuments(filter), query);
+  return { coupons, pagination };
+};
 
 exports.incrementCouponUsage = async (couponId) => Coupon.findByIdAndUpdate(couponId, { $inc: { usedCount: 1 } });
 

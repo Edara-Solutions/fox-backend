@@ -8,6 +8,7 @@ const PAYMENT_STATUS = require("../../constants/paymentStatus");
 const ORDER_STATUS = require("../../constants/orderStatus");
 const USER_ROLES = require("../../constants/roles");
 const { validateCoupon, incrementCouponUsage } = require("../coupons/coupon.service");
+const { paginate } = require("../../utils/pagination");
 
 const makeOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
 const orderPopulate = [
@@ -175,6 +176,10 @@ const assignOrder = async (orderId, assignedTo, assignedBy) => {
   return order;
 };
 
-const listAssignedOrders = async (userId) => Order.find({ assignedTo: userId }).populate(orderPopulate).sort("-createdAt");
+const listAssignedOrders = async (userId, query) => {
+  const filter = { assignedTo: userId };
+  const { documents: orders, pagination } = await paginate(Order.find(filter).populate(orderPopulate).sort("-createdAt"), Order.countDocuments(filter), query);
+  return { orders, pagination };
+};
 
 module.exports = { createOrder, deductOrderStock, restoreOrderStock, updateOrderStatus, cancelCustomerOrder, assignOrder, listAssignedOrders };
