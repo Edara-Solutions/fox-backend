@@ -27,7 +27,7 @@ exports.validateCoupon = async ({ code, orderTotal }) => {
 };
 
 exports.createCoupon = async (payload) => {
-  await ensureActiveVendor(payload.vendor);
+  if (payload.vendor) await ensureActiveVendor(payload.vendor);
   return Coupon.create({ ...payload, code: payload.code.toUpperCase() });
 };
 

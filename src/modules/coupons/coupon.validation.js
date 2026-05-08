@@ -11,7 +11,7 @@ const body = z.object({
   expiresAt: z.coerce.date().optional(),
   usageLimit: z.coerce.number().int().min(1).optional(),
   isActive: z.boolean().optional(),
-  vendor: objectId,
+  vendor: objectId.nullable().optional(),
   applicableCategories: z.array(objectId).optional(),
   applicableProducts: z.array(objectId).optional(),
 });
