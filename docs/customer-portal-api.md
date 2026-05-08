@@ -28,6 +28,24 @@ Customer-protected endpoints require:
 Authorization: Bearer <customer_token>
 ```
 
+## Pagination
+
+Endpoints that return lists support these query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `page` | No | Page number, defaults to `1` |
+| `limit` | No | Items per page, defaults to `12`, max `100` |
+
+Paginated responses include:
+
+```json
+{
+  "items": [],
+  "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+}
+```
+
 ## Public Catalog
 
 ### Health Check
@@ -62,7 +80,10 @@ Response:
 {
   "success": true,
   "message": "Categories fetched",
-  "data": { "categories": [] }
+  "data": {
+    "categories": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -98,7 +119,10 @@ Response:
 {
   "success": true,
   "message": "Brands fetched",
-  "data": { "brands": [] }
+  "data": {
+    "brands": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -188,7 +212,10 @@ Response:
 {
   "success": true,
   "message": "Reviews fetched",
-  "data": { "reviews": [] }
+  "data": {
+    "reviews": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -610,7 +637,10 @@ Response:
 {
   "success": true,
   "message": "Orders fetched",
-  "data": { "orders": [] }
+  "data": {
+    "orders": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 

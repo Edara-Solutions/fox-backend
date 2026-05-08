@@ -36,6 +36,24 @@ Errors use:
 }
 ```
 
+## Pagination
+
+Endpoints that return lists support these query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `page` | No | Page number, defaults to `1` |
+| `limit` | No | Items per page, defaults to `12`, max `100` |
+
+Paginated responses include:
+
+```json
+{
+  "items": [],
+  "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+}
+```
+
 ## Internal Auth And Users
 
 ### Login
@@ -151,7 +169,10 @@ Response:
 {
   "success": true,
   "message": "Users fetched",
-  "data": { "users": [] }
+  "data": {
+    "users": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -494,7 +515,10 @@ Response:
 {
   "success": true,
   "message": "Customers fetched",
-  "data": { "customers": [] }
+  "data": {
+    "customers": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -560,7 +584,10 @@ Response:
 {
   "success": true,
   "message": "Orders fetched",
-  "data": { "orders": [] }
+  "data": {
+    "orders": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -622,7 +649,10 @@ Response:
 {
   "success": true,
   "message": "Assigned orders fetched",
-  "data": { "orders": [] }
+  "data": {
+    "orders": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -680,7 +710,10 @@ Response:
 {
   "success": true,
   "message": "Payments fetched",
-  "data": { "payments": [] }
+  "data": {
+    "payments": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -811,7 +844,10 @@ Response:
 {
   "success": true,
   "message": "Coupons fetched",
-  "data": { "coupons": [] }
+  "data": {
+    "coupons": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -829,7 +865,10 @@ Response:
 {
   "success": true,
   "message": "Coupons fetched",
-  "data": { "coupons": [] }
+  "data": {
+    "coupons": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -903,7 +942,10 @@ Response:
 {
   "success": true,
   "message": "Low stock products fetched",
-  "data": { "products": [] }
+  "data": {
+    "products": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -919,7 +961,10 @@ Response:
 {
   "success": true,
   "message": "Out of stock products fetched",
-  "data": { "products": [] }
+  "data": {
+    "products": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
@@ -941,7 +986,10 @@ Response:
 {
   "success": true,
   "message": "Near expiry products fetched",
-  "data": { "products": [] }
+  "data": {
+    "products": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 
