@@ -160,6 +160,7 @@ Query parameters:
 | `brand` | No | Brand ObjectId |
 | `flavor` | No | Matches product `flavors` |
 | `isStack` | No | `true` or `false` |
+| `isFeatured` | No | `true` or `false` |
 | `minPrice` | No | Minimum price |
 | `maxPrice` | No | Maximum price |
 | `search` | No | Case-insensitive name search |

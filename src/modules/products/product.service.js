@@ -27,6 +27,7 @@ exports.list = async (query) => {
   if (query.brand) filter.brand = query.brand;
   if (query.flavor) filter.flavors = query.flavor;
   if (query.isStack !== undefined) filter.isStack = query.isStack === "true" || query.isStack === true;
+  if (query.isFeatured !== undefined) filter.isFeatured = query.isFeatured === "true" || query.isFeatured === true;
   if (query.minPrice || query.maxPrice) filter.price = {};
   if (query.minPrice) filter.price.$gte = Number(query.minPrice);
   if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
