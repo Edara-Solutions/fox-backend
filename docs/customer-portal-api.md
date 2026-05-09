@@ -270,6 +270,8 @@ Body:
 }
 ```
 
+If the cart already contains the same `productId` with the same `selectedFlavor`, this endpoint increases the existing cart item quantity instead of adding a duplicate line.
+
 Response:
 
 ```json
