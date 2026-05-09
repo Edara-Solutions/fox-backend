@@ -80,6 +80,7 @@ const createOrder = async (customerId, payload) => {
       return {
         product: item.product,
         name: item.name,
+        slug: product.slug,
         sku: product.sku,
         image: item.image,
         price: item.discountPrice || item.price,
