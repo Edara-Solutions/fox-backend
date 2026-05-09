@@ -8,17 +8,21 @@ const getOrCreateCart = async (customerId) => {
   return cart;
 };
 
+const getItemProductId = (item) => (item.product?._id || item.product).toString();
+const normalizeFlavor = (flavor) => (flavor || "").trim();
+
 const addItem = async (customerId, { productId, quantity, selectedFlavor }) => {
   const product = await Product.findOne({ _id: productId, isActive: true });
   if (!product) throw new ApiError(404, "Product not found");
   if (product.stock < quantity) throw new ApiError(400, "Not enough stock");
   const cart = await getOrCreateCart(customerId);
-  const existing = cart.items.find((item) => item.product.toString() === productId && (item.selectedFlavor || "") === (selectedFlavor || ""));
+  const flavor = normalizeFlavor(selectedFlavor);
+  const existing = cart.items.find((item) => getItemProductId(item) === productId && normalizeFlavor(item.selectedFlavor) === flavor);
   if (existing) {
     if (product.stock < existing.quantity + quantity) throw new ApiError(400, "Not enough stock");
     existing.quantity += quantity;
   } else {
-    cart.items.push({ product: product._id, name: product.name, image: product.images[0], price: product.price, discountPrice: product.discountPrice, selectedFlavor, quantity });
+    cart.items.push({ product: product._id, name: product.name, image: product.images[0], price: product.price, discountPrice: product.discountPrice, selectedFlavor: flavor || undefined, quantity });
   }
   cart.recalculate();
   await cart.save();
