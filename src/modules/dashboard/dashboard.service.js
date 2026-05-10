@@ -11,7 +11,7 @@ const MAX_BEST_SELLING_LIMIT = 100;
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DASHBOARD_TIMEZONE = process.env.TZ || "Africa/Cairo";
-const EXCLUDED_SALES_STATUSES = [ORDER_STATUS.CANCELLED, ORDER_STATUS.REFUNDED, ORDER_STATUS.PAYMENT_REJECTED];
+const EXCLUDED_ORDER_STATUSES = [ORDER_STATUS.CANCELLED, ORDER_STATUS.REFUNDED, ORDER_STATUS.PAYMENT_REJECTED, ORDER_STATUS.PENDING_PAYMENT, ORDER_STATUS.PAYMENT_SUBMITTED];
 
 const getRevenueTotal = async (match = {}) => {
   const [result] = await Order.aggregate([
@@ -122,7 +122,7 @@ const normalizeBestSellingLimit = (limit) => {
 const getBestSellingProducts = async (limit) => {
   const normalizedLimit = normalizeBestSellingLimit(limit);
   const products = await Order.aggregate([
-    { $match: { orderStatus: { $nin: EXCLUDED_SALES_STATUSES } } },
+    { $match: { orderStatus: { $nin: EXCLUDED_ORDER_STATUSES } } },
     { $unwind: "$items" },
     {
       $group: {
@@ -176,8 +176,8 @@ const getOverview = async () => {
     lowStockAlerts,
     activeCoupons,
   ] = await Promise.all([
-    getRevenueTotal(),
-    getRevenueTotal({ createdAt: { $gte: startOfMonth, $lt: startOfNextMonth } }),
+    getRevenueTotal({ orderStatus: { $nin: EXCLUDED_ORDER_STATUSES } }),
+    getRevenueTotal({ createdAt: { $gte: startOfMonth, $lt: startOfNextMonth }, orderStatus: { $nin: EXCLUDED_ORDER_STATUSES } }),
     Order.countDocuments({ createdAt: { $gte: startOfToday, $lt: startOfTomorrow } }),
     Order.countDocuments({ orderStatus: ORDER_STATUS.PENDING_PAYMENT }),
     Customer.countDocuments(),
