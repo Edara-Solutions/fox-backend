@@ -8,6 +8,7 @@ const PAYMENT_STATUS = require("../../constants/paymentStatus");
 const ORDER_STATUS = require("../../constants/orderStatus");
 const USER_ROLES = require("../../constants/roles");
 const { validateCoupon, incrementCouponUsage } = require("../coupons/coupon.service");
+const { getActiveCityByName } = require("../shippingCities/shippingCity.service");
 const { paginate } = require("../../utils/pagination");
 
 const makeOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
@@ -65,10 +66,11 @@ const createOrder = async (customerId, payload) => {
     if (product.stock < item.quantity) throw new ApiError(400, `${item.name} does not have enough stock`);
     productSnapshots.set(item.product.toString(), product);
   }
-  const shippingFee = payload.shippingFee || 0;
+  const shippingCity = await getActiveCityByName(payload.shippingDetails.city);
   const validatedCoupon = payload.couponCode
     ? await validateCoupon({ code: payload.couponCode, orderTotal: cart.subtotal })
     : null;
+  const shippingFee = validatedCoupon?.freeShipping ? 0 : shippingCity.shippingFee;
   const discount = validatedCoupon ? validatedCoupon.discount : 0;
   const vendor = validatedCoupon ? validatedCoupon.coupon.vendor : null;
   const total = cart.subtotal + shippingFee - discount;
@@ -95,7 +97,10 @@ const createOrder = async (customerId, payload) => {
     couponCode: payload.couponCode,
     vendor,
     paymentMethod: payload.paymentMethod,
-    shippingDetails: payload.shippingDetails,
+    shippingDetails: {
+      ...payload.shippingDetails,
+      city: shippingCity.name,
+    },
     notes: payload.notes,
     paymentStatus: PAYMENT_STATUS.PENDING,
     orderStatus: ORDER_STATUS.PENDING_PAYMENT,
