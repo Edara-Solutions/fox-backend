@@ -220,6 +220,29 @@ Response:
 }
 ```
 
+### List Shipping Cities
+
+`GET /api/shipping-cities`
+
+Description: Returns active cities available for checkout with their shipping fees.
+
+Authorization: None.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Shipping cities fetched",
+  "data": {
+    "cities": [
+      { "name": "Cairo", "shippingFee": 50, "isActive": true }
+    ],
+    "pagination": { "page": 1, "limit": 12, "total": 1, "pages": 1 }
+  }
+}
+```
+
 ## Customer Auth
 
 ### Register
@@ -605,12 +628,17 @@ Optional body:
 ```json
 {
   "couponCode": "SAVE10",
-  "notes": "Please call before delivery",
-  "shippingFee": 50
+  "notes": "Please call before delivery"
 }
 ```
 
 Valid payment methods: `vodafone_cash`, `instapay`.
+
+Notes:
+
+- `shippingDetails.city` must match an active city from `GET /api/shipping-cities`.
+- `shippingFee` is calculated by the server from the selected city.
+- Free shipping coupons set `shippingFee` to `0`.
 
 Response:
 

@@ -376,6 +376,95 @@ Response:
 
 ## Catalog Management
 
+## Shipping Cities
+
+### Create Shipping City
+
+`POST /api/shipping-cities`
+
+Authorization: `admin`, `super_admin`.
+
+Body:
+
+```json
+{
+  "name": "Cairo",
+  "shippingFee": 50,
+  "isActive": true
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Shipping city created",
+  "data": { "city": {} }
+}
+```
+
+### List Shipping Cities
+
+`GET /api/shipping-cities/admin`
+
+Authorization: `admin`, `super_admin`.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Shipping cities fetched",
+  "data": {
+    "cities": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
+}
+```
+
+### Update Shipping City
+
+`PATCH /api/shipping-cities/:id`
+
+Authorization: `admin`, `super_admin`.
+
+Body, all optional:
+
+```json
+{
+  "name": "Giza",
+  "shippingFee": 60,
+  "isActive": true
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Shipping city updated",
+  "data": { "city": {} }
+}
+```
+
+### Delete Shipping City
+
+`DELETE /api/shipping-cities/:id`
+
+Authorization: `admin`, `super_admin`.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Shipping city deleted",
+  "data": null
+}
+```
+
 ### Create Category
 
 `POST /api/categories`
