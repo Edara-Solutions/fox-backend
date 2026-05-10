@@ -54,6 +54,127 @@ Paginated responses include:
 }
 ```
 
+## Dashboard
+
+### Overview
+
+`GET /api/dashboard/overview`
+
+Authorization: `admin`, `super_admin`.
+
+Returns admin dashboard summary metrics.
+
+Notes:
+
+- `totalRevenue` and `monthlyRevenue` sum `order.total - order.shippingFee`.
+- `monthlyRevenue` is for the current calendar month.
+- `productsInStock` counts active product records with stock above `0`.
+- `lowStockAlerts` counts active product records with stock from `1` to `5`.
+- `activeCoupons` counts enabled coupons within their date window and under usage limit.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Dashboard overview fetched",
+  "data": {
+    "overview": {
+      "totalRevenue": 50000,
+      "todaysOrders": 12,
+      "pendingOrders": 4,
+      "totalCustomers": 300,
+      "productsInStock": 80,
+      "lowStockAlerts": 6,
+      "activeCoupons": 3,
+      "monthlyRevenue": 12000
+    }
+  }
+}
+```
+
+### Revenue
+
+`GET /api/dashboard/revenue?period=year`
+
+Authorization: `admin`, `super_admin`.
+
+Query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `period` | No | One of `year`, `month`, `week`. Defaults to `year`. |
+
+Returns revenue chart data for the selected period.
+
+Notes:
+
+- Revenue is calculated as `order.total - order.shippingFee`.
+- `year` returns the current calendar year grouped by month.
+- `month` returns the current calendar month grouped by day number.
+- `week` returns the last 7 days including today grouped by weekday name.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Dashboard revenue fetched",
+  "data": {
+    "revenue": [
+      { "name": "Jan", "revenue": 420000 },
+      { "name": "Feb", "revenue": 510000 },
+      { "name": "Mar", "revenue": 488000 },
+      { "name": "Apr", "revenue": 620000 },
+      { "name": "May", "revenue": 845600 },
+      { "name": "Jun", "revenue": 920000 },
+      { "name": "Jul", "revenue": 980000 },
+      { "name": "Aug", "revenue": 1050000 },
+      { "name": "Sep", "revenue": 1120000 },
+      { "name": "Oct", "revenue": 1180000 },
+      { "name": "Nov", "revenue": 1240000 },
+      { "name": "Dec", "revenue": 1300000 }
+    ]
+  }
+}
+```
+
+### Best Selling Products
+
+`GET /api/dashboard/best-selling-products?limit=3`
+
+Authorization: `admin`, `super_admin`.
+
+Query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `limit` | No | Number of products to return. Defaults to `5`, max `100`. |
+
+Returns top selling products by total sold quantity.
+
+Notes:
+
+- `sold` is the total ordered quantity for the product.
+- `revenue` is calculated per item as `item.price * item.quantity`.
+- Cancelled, refunded, and payment rejected orders are excluded.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Best selling products fetched",
+  "data": {
+    "products": [
+      { "name": "BE-FOX Whey Isolate 2kg", "sold": 420, "revenue": 1213800 },
+      { "name": "Creatine Monohydrate 300g", "sold": 318, "revenue": 311640 },
+      { "name": "C4 Pre Workout Blast", "sold": 206, "revenue": 327540 }
+    ]
+  }
+}
+```
+
 ## Internal Auth And Users
 
 ### Login

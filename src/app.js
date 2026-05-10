@@ -30,6 +30,7 @@ app.use("/api/payments", require("./modules/payments/payment.routes"));
 app.use("/api/inventory", require("./modules/inventory/inventory.routes"));
 app.use("/api/coupons", require("./modules/coupons/coupon.routes"));
 app.use("/api/reviews", require("./modules/reviews/review.routes"));
+app.use("/api/dashboard", require("./modules/dashboard/dashboard.routes"));
 
 app.use(notFound);
 app.use(errorMiddleware);
