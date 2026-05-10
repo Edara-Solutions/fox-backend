@@ -66,7 +66,7 @@ Returns admin dashboard summary metrics.
 
 Notes:
 
-- `totalRevenue` and `monthlyRevenue` sum `order.total - order.shippingFee`.
+- `totalRevenue` and `monthlyRevenue` sum `order.total - order.shippingFee`, excluding orders with `cancelled`, `refunded`, `payment_rejected`, `pending_payment`, or `payment_submitted` status.
 - `monthlyRevenue` is for the current calendar month.
 - `productsInStock` counts active product records with stock above `0`.
 - `lowStockAlerts` counts active product records with stock from `1` to `5`.
@@ -157,7 +157,7 @@ Notes:
 
 - `sold` is the total ordered quantity for the product.
 - `revenue` is calculated per item as `item.price * item.quantity`.
-- Cancelled, refunded, and payment rejected orders are excluded.
+- Cancelled, refunded, pending payment, payment submitted, and payment rejected orders are excluded.
 
 Response:
 
