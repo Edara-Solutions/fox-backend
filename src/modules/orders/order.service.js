@@ -1,5 +1,6 @@
 const Cart = require("../cart/cart.model");
 const Order = require("./order.model");
+const Customer = require("../customers/customer.model");
 const Payment = require("../payments/payment.model");
 const Product = require("../products/product.model");
 const User = require("../users/user.model");
@@ -20,6 +21,49 @@ const orderPopulate = [
   { path: "payment" },
 ];
 const assignableRoles = [USER_ROLES.ORDER_MANAGER, USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN];
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const parseDateStart = (value) => {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const parseDateExclusiveEnd = (value) => {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) return null;
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date;
+};
+
+const buildOrderListFilter = async (query) => {
+  const filter = {};
+  const { search, orderStatus, paymentStatus, paymentMethod, dateFrom, dateTo } = query;
+
+  if (orderStatus) filter.orderStatus = orderStatus;
+  if (paymentStatus) filter.paymentStatus = paymentStatus;
+  if (paymentMethod) filter.paymentMethod = paymentMethod;
+
+  const startDate = parseDateStart(dateFrom);
+  const endDate = parseDateExclusiveEnd(dateTo);
+  if (startDate || endDate) {
+    filter.createdAt = {};
+    if (startDate) filter.createdAt.$gte = startDate;
+    if (endDate) filter.createdAt.$lt = endDate;
+  }
+
+  if (search?.trim()) {
+    const regex = new RegExp(escapeRegex(search.trim()), "i");
+    const customers = await Customer.find({ $or: [{ fullName: regex }, { phone: regex }] }).select("_id");
+
+    filter.$or = [{ orderNumber: regex }];
+    if (customers.length) filter.$or.push({ customer: { $in: customers.map((customer) => customer._id) } });
+  }
+
+  return filter;
+};
 
 const deductOrderStock = async (order) => {
   if (order.stockDeducted) return;
@@ -142,6 +186,10 @@ const updateOrderStatus = async (orderId, orderStatus) => {
     await Payment.findOneAndUpdate({ order: order._id }, { status: PAYMENT_STATUS.REFUNDED });
   }
 
+  if (orderStatus === ORDER_STATUS.SHIPPED) {
+    order.shippedAt = order.shippedAt || new Date();
+  }
+
   if (orderStatus === ORDER_STATUS.DELIVERED) {
     order.deliveredAt = order.deliveredAt || new Date();
   }
@@ -203,4 +251,10 @@ const listAssignedOrders = async (userId, query) => {
   return { orders, pagination };
 };
 
-module.exports = { createOrder, deductOrderStock, restoreOrderStock, updateOrderStatus, cancelCustomerOrder, assignOrder, listAssignedOrders };
+const listOrders = async (query) => {
+  const filter = await buildOrderListFilter(query);
+  const { documents: orders, pagination } = await paginate(Order.find(filter).populate(orderPopulate).sort("-createdAt"), Order.countDocuments(filter), query);
+  return { orders, pagination };
+};
+
+module.exports = { createOrder, deductOrderStock, restoreOrderStock, updateOrderStatus, cancelCustomerOrder, assignOrder, listAssignedOrders, listOrders };

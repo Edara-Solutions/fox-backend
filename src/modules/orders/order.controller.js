@@ -23,8 +23,7 @@ exports.myOrder = asyncHandler(async (req, res) => res.json(new ApiResponse("Ord
 exports.cancelMine = asyncHandler(async (req, res) => res.json(new ApiResponse("Order cancelled", { order: await service.cancelCustomerOrder(req.customer._id, req.params.id) })));
 exports.assignedToMe = asyncHandler(async (req, res) => res.json(new ApiResponse("Assigned orders fetched", await service.listAssignedOrders(req.user._id, req.query))));
 exports.list = asyncHandler(async (req, res) => {
-  const { documents: orders, pagination } = await paginate(Order.find().populate(orderPopulate).sort("-createdAt"), Order.countDocuments(), req.query);
-  res.json(new ApiResponse("Orders fetched", { orders, pagination }));
+  res.json(new ApiResponse("Orders fetched", await service.listOrders(req.query)));
 });
 exports.get = asyncHandler(async (req, res) => res.json(new ApiResponse("Order fetched", { order: await Order.findById(req.params.id).populate(orderPopulate) })));
 exports.assign = asyncHandler(async (req, res) => res.json(new ApiResponse("Order assigned", { order: await service.assignOrder(req.params.id, req.body.assignedTo, req.user._id) })));

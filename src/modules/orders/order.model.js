@@ -40,6 +40,7 @@ const orderSchema = new mongoose.Schema(
     notes: String,
     paidAt: Date,
     confirmedAt: Date,
+    shippedAt: Date,
     deliveredAt: Date,
     completedAt: Date,
     cancelledAt: Date,
