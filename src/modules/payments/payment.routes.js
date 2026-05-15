@@ -13,6 +13,6 @@ router.get("/instructions/:orderId", customerAuth, validate(validation.orderId),
 router.post("/:orderId/proof", customerAuth, upload.single("proofImage"), validate(validation.proof), controller.submitProof);
 router.get("/", userAuth, reviewers, controller.list);
 router.get("/:id", userAuth, reviewers, validate(validation.idParam), controller.get);
-router.patch("/:id/approve", userAuth, reviewers, validate(validation.idParam), controller.approve);
+router.patch("/:id/approve", userAuth, reviewers, validate(validation.approve), controller.approve);
 router.patch("/:id/reject", userAuth, reviewers, validate(validation.reject), controller.reject);
 module.exports = router;

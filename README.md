@@ -51,10 +51,11 @@ There is intentionally no `customer` role in users. Customers and users have ind
 3. Backend returns exact payment instructions from env values.
 4. Customer uploads payment proof with screenshot, reference, sender info, and paid amount.
 5. Internal `order_manager`, `admin`, or `super_admin` reviews proof.
-6. Approval sets payment to `paid`, order to `confirmed`, timestamps payment/confirmation, and decreases product stock.
+6. Approval sets payment to `paid` or `partially_paid`, order to `confirmed`, stores `paid` / `reminder` amounts, timestamps confirmation, and decreases product stock.
 7. Rejection sets payment to `rejected`, order to `payment_rejected`, and stores the rejection reason.
 
 Stock is never decreased when an order is created. Stock is decreased only after payment proof approval.
+Staff can later mark an order as `completed`; this sets `paid` to the order `subtotal`, clears `reminder` to `0`, marks payment as `paid`, and records `completedAt`.
 
 ## Create First Super Admin
 

@@ -12,6 +12,9 @@ const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Se
 const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DASHBOARD_TIMEZONE = process.env.TZ || "Africa/Cairo";
 const EXCLUDED_ORDER_STATUSES = [ORDER_STATUS.CANCELLED, ORDER_STATUS.REFUNDED, ORDER_STATUS.PAYMENT_REJECTED, ORDER_STATUS.PENDING_PAYMENT, ORDER_STATUS.PAYMENT_SUBMITTED];
+const revenueAmountExpression = {
+  $cond: [{ $ne: [{ $type: "$paid" }, "missing"] }, "$paid", { $subtract: ["$total", { $ifNull: ["$shippingFee", 0] }] }],
+};
 
 const getRevenueTotal = async (match = {}) => {
   const [result] = await Order.aggregate([
@@ -19,7 +22,7 @@ const getRevenueTotal = async (match = {}) => {
     {
       $group: {
         _id: null,
-        total: { $sum: { $subtract: ["$total", { $ifNull: ["$shippingFee", 0] }] } },
+        total: { $sum: revenueAmountExpression },
       },
     },
   ]);
@@ -92,11 +95,11 @@ const getRevenuePeriodConfig = (period) => {
 const getRevenueByPeriod = async (period = "year") => {
   const { start, end, bucket, labels } = getRevenuePeriodConfig(period);
   const rows = await Order.aggregate([
-    { $match: { createdAt: { $gte: start, $lt: end } } },
+    { $match: { createdAt: { $gte: start, $lt: end }, orderStatus: { $nin: EXCLUDED_ORDER_STATUSES } } },
     {
       $group: {
         _id: bucket,
-        revenue: { $sum: { $subtract: ["$total", { $ifNull: ["$shippingFee", 0] }] } },
+        revenue: { $sum: revenueAmountExpression },
       },
     },
   ]);

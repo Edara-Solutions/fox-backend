@@ -650,6 +650,8 @@ Response:
     "order": {
       "paymentStatus": "pending",
       "orderStatus": "pending_payment",
+      "paid": 0,
+      "reminder": 1050,
       "payment": {}
     }
   }
@@ -756,7 +758,7 @@ Body fields:
 }
 ```
 
-All body fields are currently optional, but `proofImage` is required either as an uploaded file or URL.
+All body fields are currently optional, but `proofImage` is required either as an uploaded file or URL. The admin approval amount is the source of truth for final `paid` and `reminder` values.
 
 Response:
 
@@ -849,6 +851,8 @@ Response:
 - Customer tokens and internal user tokens are different and cannot be used interchangeably.
 - Cart stock checks happen when adding/updating cart items and again when creating an order.
 - Product stock is deducted only after payment approval by internal staff.
+- Staff can approve payment as `paid` or `partially_paid`; both move the order to `confirmed`, and partial approvals expose the remaining balance in `reminder`.
 - If a paid/confirmed order is later cancelled or refunded by staff, stock is restored once.
+- Staff can mark an order as `completed`; completed orders have `reminder` set to `0`.
 - Orders include related `payment` data when available.
 - Orders with coupons include `vendor` metadata from the coupon when the coupon has a vendor; otherwise order `vendor` is `null`.

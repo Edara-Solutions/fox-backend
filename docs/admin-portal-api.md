@@ -66,7 +66,7 @@ Returns admin dashboard summary metrics.
 
 Notes:
 
-- `totalRevenue` and `monthlyRevenue` sum `order.total - order.shippingFee`, excluding orders with `cancelled`, `refunded`, `payment_rejected`, `pending_payment`, or `payment_submitted` status.
+- `totalRevenue` and `monthlyRevenue` sum `order.paid` when present, otherwise `order.total - order.shippingFee`, excluding orders with `cancelled`, `refunded`, `payment_rejected`, `pending_payment`, or `payment_submitted` status.
 - `monthlyRevenue` is for the current calendar month.
 - `productsInStock` counts active product records with stock above `0`.
 - `lowStockAlerts` counts active product records with stock from `1` to `5`.
@@ -776,6 +776,7 @@ Order statuses:
 - `processing`
 - `shipped`
 - `delivered`
+- `completed`
 - `cancelled`
 - `refunded`
 - `payment_rejected`
@@ -882,7 +883,8 @@ Body:
 
 Side effects:
 
-- `confirmed`: deducts product stock once, marks payment as `paid`, and sets `paidAt` / `confirmedAt`.
+- `confirmed`: deducts product stock once, marks payment as `paid`, sets `paid` to `total`, clears `reminder`, and sets `paidAt` / `confirmedAt`.
+- `completed`: deducts product stock if needed, marks payment as `paid`, sets `paid` to `subtotal`, clears `reminder`, and sets `paidAt` / `confirmedAt` / `completedAt`.
 - `cancelled`: restores product stock if it had been deducted, and sets `cancelledAt`.
 - `refunded`: restores product stock if it had been deducted, marks payment as `refunded`, and sets `refundedAt`.
 - `delivered`: sets `deliveredAt`.
@@ -904,6 +906,7 @@ Payment statuses:
 - `pending`
 - `awaiting_review`
 - `paid`
+- `partially_paid`
 - `rejected`
 - `failed`
 - `refunded`
@@ -949,7 +952,20 @@ Response:
 
 Authorization: `order_manager`, `admin`, `super_admin`.
 
-Description: Approves payment proof, deducts product stock once, sets payment to `paid`, and order to `confirmed`.
+Description: Approves payment proof, deducts product stock once, sets order to `confirmed`, and stores the approved payment state on both payment and order.
+
+Body:
+
+```json
+{
+  "paymentStatus": "paid",
+  "paidAmount": 1000
+}
+```
+
+Use `paymentStatus: "paid"` for full approval. The backend sets `paid` to the order `total` and `reminder` to `0`; `paidAmount` is optional and ignored for full approval.
+
+Use `paymentStatus: "partially_paid"` for partial approval. `paidAmount` is required, must be greater than `0`, and must be less than the order `total`; the backend sets `paid` to that amount and calculates `reminder`.
 
 Response:
 

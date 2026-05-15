@@ -5,6 +5,7 @@ module.exports = Object.freeze({
   PROCESSING: "processing",
   SHIPPED: "shipped",
   DELIVERED: "delivered",
+  COMPLETED: "completed",
   CANCELLED: "cancelled",
   REFUNDED: "refunded",
   PAYMENT_REJECTED: "payment_rejected",

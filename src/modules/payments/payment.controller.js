@@ -19,5 +19,5 @@ exports.list = asyncHandler(async (req, res) => {
   res.json(new ApiResponse("Payments fetched", { payments, pagination }));
 });
 exports.get = asyncHandler(async (req, res) => res.json(new ApiResponse("Payment fetched", { payment: await Payment.findById(req.params.id).populate("order customer reviewedBy") })));
-exports.approve = asyncHandler(async (req, res) => res.json(new ApiResponse("Payment approved", { payment: await service.approve(req.params.id, req.user._id) })));
+exports.approve = asyncHandler(async (req, res) => res.json(new ApiResponse("Payment approved", { payment: await service.approve(req.params.id, req.user._id, req.body) })));
 exports.reject = asyncHandler(async (req, res) => res.json(new ApiResponse("Payment rejected", { payment: await service.reject(req.params.id, req.user._id, req.body.rejectionReason) })));

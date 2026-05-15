@@ -94,6 +94,8 @@ const createOrder = async (customerId, payload) => {
     discount,
     shippingFee,
     total,
+    paid: 0,
+    reminder: total,
     couponCode: payload.couponCode,
     vendor,
     paymentMethod: payload.paymentMethod,
@@ -118,13 +120,15 @@ const updateOrderStatus = async (orderId, orderStatus) => {
   const order = await Order.findById(orderId);
   if (!order) throw new ApiError(404, "Order not found");
 
-  if (orderStatus === ORDER_STATUS.CONFIRMED) {
-    await deductOrderStock(order);
-    order.paymentStatus = PAYMENT_STATUS.PAID;
-    order.paidAt = order.paidAt || new Date();
-    order.confirmedAt = order.confirmedAt || new Date();
-    await Payment.findOneAndUpdate({ order: order._id }, { status: PAYMENT_STATUS.PAID });
-  }
+  // if (orderStatus === ORDER_STATUS.CONFIRMED) {
+  //   await deductOrderStock(order);
+  //   order.paymentStatus = PAYMENT_STATUS.PAID;
+  //   order.paid = order.total;
+  //   order.reminder = 0;
+  //   order.paidAt = order.paidAt || new Date();
+  //   order.confirmedAt = order.confirmedAt || new Date();
+  //   await Payment.findOneAndUpdate({ order: order._id }, { status: PAYMENT_STATUS.PAID, amount: order.total });
+  // }
 
   if (orderStatus === ORDER_STATUS.CANCELLED) {
     await restoreOrderStock(order);
@@ -140,6 +144,17 @@ const updateOrderStatus = async (orderId, orderStatus) => {
 
   if (orderStatus === ORDER_STATUS.DELIVERED) {
     order.deliveredAt = order.deliveredAt || new Date();
+  }
+
+  if (orderStatus === ORDER_STATUS.COMPLETED) {
+    await deductOrderStock(order);
+    order.paymentStatus = PAYMENT_STATUS.PAID;
+    order.paid = order.subtotal;
+    order.reminder = 0;
+    order.paidAt = order.paidAt || new Date();
+    order.confirmedAt = order.confirmedAt || new Date();
+    order.completedAt = order.completedAt || new Date();
+    await Payment.findOneAndUpdate({ order: order._id }, { status: PAYMENT_STATUS.PAID, amount: order.subtotal });
   }
 
   order.orderStatus = orderStatus;
