@@ -789,6 +789,19 @@ Authorization: `order_manager`, `admin`, `super_admin`.
 
 Description: Returns all orders with customer, vendor, assigned user, and payment populated.
 
+Query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `search` | No | Case-insensitive search by `orderNumber`, customer `fullName`, or customer `phone` |
+| `orderStatus` | No | Filters by one order status value |
+| `paymentStatus` | No | Filters by one payment status value |
+| `paymentMethod` | No | Filters by one payment method: `vodafone_cash` or `instapay` |
+| `dateFrom` | No | Filters orders created on or after this date, format `YYYY-MM-DD` |
+| `dateTo` | No | Filters orders created on or before this date, format `YYYY-MM-DD` |
+| `page` | No | Defaults to `1` |
+| `limit` | No | Defaults to `12`, max `100` |
+
 Response:
 
 ```json
@@ -887,6 +900,7 @@ Side effects:
 - `completed`: deducts product stock if needed, marks payment as `paid`, sets `paid` to `subtotal`, clears `reminder`, and sets `paidAt` / `confirmedAt` / `completedAt`.
 - `cancelled`: restores product stock if it had been deducted, and sets `cancelledAt`.
 - `refunded`: restores product stock if it had been deducted, marks payment as `refunded`, and sets `refundedAt`.
+- `shipped`: sets `shippedAt`.
 - `delivered`: sets `deliveredAt`.
 
 Response:

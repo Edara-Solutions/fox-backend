@@ -852,6 +852,7 @@ Response:
 - Cart stock checks happen when adding/updating cart items and again when creating an order.
 - Product stock is deducted only after payment approval by internal staff.
 - Staff can approve payment as `paid` or `partially_paid`; both move the order to `confirmed`, and partial approvals expose the remaining balance in `reminder`.
+- Staff can mark an order as `shipped`; shipped orders include `shippedAt`.
 - If a paid/confirmed order is later cancelled or refunded by staff, stock is restored once.
 - Staff can mark an order as `completed`; completed orders have `reminder` set to `0`.
 - Orders include related `payment` data when available.
