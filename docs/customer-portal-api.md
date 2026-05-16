@@ -189,6 +189,10 @@ Description: Returns one active product by slug with brand and category populate
 
 Authorization: None.
 
+Notes:
+
+- Product `warnings` and `usageInstructions` are arrays of strings when present.
+
 Response:
 
 ```json

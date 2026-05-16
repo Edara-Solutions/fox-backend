@@ -10,15 +10,41 @@ const ensureRefs = async ({ category, brand }) => {
   if (brand && !(await Brand.exists({ _id: brand }))) throw new ApiError(404, "Brand not found");
 };
 
+const normalizeStringArray = (value) => {
+  if (value === undefined) return value;
+  if (Array.isArray(value)) return value.map(String);
+  if (typeof value !== "string") return value;
+
+  const trimmed = value.trim();
+  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) return parsed.map(String);
+    } catch {
+      return [value];
+    }
+  }
+
+  return [value];
+};
+
+const normalizeProductPayload = (payload) => ({
+  ...payload,
+  ...(payload.warnings !== undefined ? { warnings: normalizeStringArray(payload.warnings) } : {}),
+  ...(payload.usageInstructions !== undefined ? { usageInstructions: normalizeStringArray(payload.usageInstructions) } : {}),
+});
+
 exports.create = async (payload) => {
+  console.log("payload", payload);
   await ensureRefs(payload);
-  return Product.create({ ...payload, slug: slugifyText(payload.name) });
+  return Product.create({ ...normalizeProductPayload(payload), slug: slugifyText(payload.name) });
 };
 
 exports.update = async (id, payload) => {
   await ensureRefs(payload);
-  if (payload.name) payload.slug = slugifyText(payload.name);
-  return Product.findByIdAndUpdate(id, payload, { new: true });
+  const normalizedPayload = normalizeProductPayload(payload);
+  if (normalizedPayload.name) normalizedPayload.slug = slugifyText(normalizedPayload.name);
+  return Product.findByIdAndUpdate(id, normalizedPayload, { new: true });
 };
 
 exports.list = async (query) => {

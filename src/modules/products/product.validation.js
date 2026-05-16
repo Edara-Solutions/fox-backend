@@ -1,6 +1,23 @@
 const { z } = require("zod");
 const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/);
 const booleanValue = z.union([z.boolean(), z.enum(["true", "false"])]);
+const stringArray = z.preprocess((value) => {
+  if (value === undefined) return value;
+  if (Array.isArray(value)) return value;
+  if (typeof value !== "string") return value;
+
+  const trimmed = value.trim();
+  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      return value;
+    }
+  }
+
+  return [value];
+}, z.array(z.string()));
 
 const body = z.object({
   name: z.string().min(2),
@@ -19,8 +36,8 @@ const body = z.object({
   servings: z.coerce.number().optional(),
   ingredients: z.array(z.string()).optional(),
   nutritionFacts: z.record(z.string(), z.any()).optional(),
-  warnings: z.string().optional(),
-  usageInstructions: z.string().optional(),
+  warnings: stringArray.optional(),
+  usageInstructions: stringArray.optional(),
   expiryDate: z.coerce.date().optional(),
   isActive: booleanValue.optional(),
   isFeatured: booleanValue.optional(),
