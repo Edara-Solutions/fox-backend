@@ -9,6 +9,7 @@ const USER_ROLES = require("../../constants/roles");
 
 const catalogManagers = roles(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN, USER_ROLES.INVENTORY_MANAGER);
 router.post("/", userAuth, catalogManagers, upload.array("images", 8), validate(validation.create), controller.create);
+router.get("/admin", userAuth, catalogManagers, controller.listAdmin);
 router.get("/", controller.list);
 router.get("/:slug", validate(validation.slugParam), controller.getBySlug);
 router.patch("/:id", userAuth, catalogManagers, upload.array("images", 8), validate(validation.update), controller.update);

@@ -148,7 +148,7 @@ Response:
 
 `GET /api/products`
 
-Description: Returns active products with pagination and optional filters.
+Description: Returns active products with pagination and optional filters. Inactive products are not returned on the customer portal.
 
 Authorization: None.
 
@@ -168,6 +168,10 @@ Query parameters:
 | `limit` | No | Defaults to `12`, max `100` |
 | `sort` | No | Mongoose sort string, defaults to `-createdAt` |
 
+Notes:
+
+- Products with `isActive: false` are excluded even when they match the provided filters.
+
 Response:
 
 ```json
@@ -185,7 +189,7 @@ Response:
 
 `GET /api/products/:slug`
 
-Description: Returns one active product by slug with brand and category populated.
+Description: Returns one active product by slug with brand and category populated. Inactive products are not returned.
 
 Authorization: None.
 

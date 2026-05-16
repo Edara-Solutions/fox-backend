@@ -47,8 +47,13 @@ exports.update = async (id, payload) => {
   return Product.findByIdAndUpdate(id, normalizedPayload, { new: true });
 };
 
-exports.list = async (query) => {
-  const filter = { isActive: true };
+exports.list = async (query, options = {}) => {
+  const filter = {};
+  if (options.includeInactive) {
+    if (query.isActive !== undefined) filter.isActive = query.isActive === "true" || query.isActive === true;
+  } else {
+    filter.isActive = true;
+  }
   if (query.category) filter.category = query.category;
   if (query.brand) filter.brand = query.brand;
   if (query.flavor) filter.flavors = query.flavor;

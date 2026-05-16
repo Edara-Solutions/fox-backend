@@ -591,6 +591,44 @@ Response:
 }
 ```
 
+### List Products
+
+`GET /api/products/admin`
+
+Authorization: `admin`, `super_admin`, `inventory_manager`.
+
+Description: Returns products for CRM management, including inactive products by default.
+
+Query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `category` | No | Category ObjectId |
+| `brand` | No | Brand ObjectId |
+| `flavor` | No | Matches product `flavors` |
+| `isActive` | No | `true` or `false`. When omitted, active and inactive products are returned. |
+| `isStack` | No | `true` or `false` |
+| `isFeatured` | No | `true` or `false` |
+| `minPrice` | No | Minimum price |
+| `maxPrice` | No | Maximum price |
+| `search` | No | Case-insensitive name search |
+| `page` | No | Defaults to `1` |
+| `limit` | No | Defaults to `12`, max `100` |
+| `sort` | No | Mongoose sort string, defaults to `-createdAt` |
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Products fetched",
+  "data": {
+    "products": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
+}
+```
+
 ### Create Product
 
 `POST /api/products`

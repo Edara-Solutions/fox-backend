@@ -14,6 +14,7 @@ exports.create = asyncHandler(async (req, res) => {
   res.status(201).json(new ApiResponse("Product created", { product: await service.create({ ...req.body, ...(images.length ? { images } : {}) }) }));
 });
 exports.list = asyncHandler(async (req, res) => res.json(new ApiResponse("Products fetched", await service.list(req.query))));
+exports.listAdmin = asyncHandler(async (req, res) => res.json(new ApiResponse("Products fetched", await service.list(req.query, { includeInactive: true }))));
 exports.getBySlug = asyncHandler(async (req, res) => res.json(new ApiResponse("Product fetched", { product: await Product.findOne({ slug: req.params.slug, isActive: true }).populate("brand category") })));
 exports.update = asyncHandler(async (req, res) => {
   const images = await imageUrls(req.files);
