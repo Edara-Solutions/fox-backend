@@ -35,7 +35,6 @@ const normalizeProductPayload = (payload) => ({
 });
 
 exports.create = async (payload) => {
-  console.log("payload", payload);
   await ensureRefs(payload);
   return Product.create({ ...normalizeProductPayload(payload), slug: slugifyText(payload.name) });
 };

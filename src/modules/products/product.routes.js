@@ -12,6 +12,7 @@ router.post("/", userAuth, catalogManagers, upload.array("images", 8), validate(
 router.get("/admin", userAuth, catalogManagers, controller.listAdmin);
 router.get("/", controller.list);
 router.get("/:slug", validate(validation.slugParam), controller.getBySlug);
+router.get("/admin/:slug", userAuth, catalogManagers, validate(validation.slugParam), controller.getBySlugAdmin);
 router.patch("/:id", userAuth, catalogManagers, upload.array("images", 8), validate(validation.update), controller.update);
 router.delete("/:id", userAuth, roles(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN), validate(validation.idParam), controller.remove);
 router.patch("/:id/stock", userAuth, catalogManagers, validate(validation.updateStock), controller.updateStock);

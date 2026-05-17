@@ -629,6 +629,24 @@ Response:
 }
 ```
 
+### Get Product By Slug
+
+`GET /api/products/admin/:slug`
+
+Authorization: `admin`, `super_admin`, `inventory_manager`.
+
+Description: Returns one product by slug for CRM management, including inactive products.
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Product fetched",
+  "data": { "product": {} }
+}
+```
+
 ### Create Product
 
 `POST /api/products`
