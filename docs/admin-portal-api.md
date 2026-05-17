@@ -833,6 +833,15 @@ Response:
 
 Authorization: `admin`, `super_admin`, `customer_support`.
 
+Query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `search` | No | Case-insensitive match against customer `fullName`, `email`, or `phone` |
+| `isBlocked` | No | `true` or `false` |
+| `page` | No | Defaults to `1` |
+| `limit` | No | Defaults to `12`, max `100` |
+
 Response:
 
 ```json

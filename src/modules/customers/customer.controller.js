@@ -2,7 +2,6 @@ const ApiResponse = require("../../utils/ApiResponse");
 const asyncHandler = require("../../utils/asyncHandler");
 const Customer = require("./customer.model");
 const service = require("./customer.service");
-const { paginate } = require("../../utils/pagination");
 
 exports.register = asyncHandler(async (req, res) => {
   res.status(201).json(new ApiResponse("Customer registered", await service.register(req.body)));
@@ -42,7 +41,7 @@ exports.setDefaultAddress = asyncHandler(async (req, res) => {
 });
 
 exports.listAdmin = asyncHandler(async (req, res) => {
-  const { documents: customers, pagination } = await paginate(Customer.find().sort("-createdAt"), Customer.countDocuments(), req.query);
+  const { customers, pagination } = await service.listAdmin(req.query);
   res.json(new ApiResponse("Customers fetched", { customers, pagination }));
 });
 

@@ -1,11 +1,27 @@
 const ApiError = require("../../utils/ApiError");
 const Customer = require("./customer.model");
 const generateCustomerToken = require("../../utils/generateCustomerToken");
+const { paginate } = require("../../utils/pagination");
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const sanitize = (customer) => {
   const obj = customer.toObject ? customer.toObject() : customer;
   delete obj.password;
   return obj;
+};
+
+const adminFilter = (query) => {
+  const filter = {};
+
+  if (query.search?.trim()) {
+    const search = new RegExp(escapeRegex(query.search.trim()), "i");
+    filter.$or = [{ fullName: search }, { email: search }, { phone: search }];
+  }
+
+  if (query.isBlocked !== undefined) filter.isBlocked = query.isBlocked === "true" || query.isBlocked === true;
+
+  return filter;
 };
 
 const register = async (payload) => {
@@ -23,6 +39,12 @@ const login = async ({ email, password }) => {
 };
 
 const updateMe = async (customerId, payload) => Customer.findByIdAndUpdate(customerId, payload, { new: true });
+
+const listAdmin = async (query) => {
+  const filter = adminFilter(query);
+  const { documents: customers, pagination } = await paginate(Customer.find(filter).sort("-createdAt"), Customer.countDocuments(filter), query);
+  return { customers, pagination };
+};
 
 const changePassword = async (customerId, currentPassword, newPassword) => {
   const customer = await Customer.findById(customerId).select("+password");
@@ -64,4 +86,4 @@ const setDefaultAddress = async (customer, addressId) => {
   return customer;
 };
 
-module.exports = { register, login, updateMe, changePassword, addAddress, updateAddress, deleteAddress, setDefaultAddress };
+module.exports = { register, login, updateMe, listAdmin, changePassword, addAddress, updateAddress, deleteAddress, setDefaultAddress };
