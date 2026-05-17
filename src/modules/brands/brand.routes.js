@@ -9,6 +9,7 @@ const USER_ROLES = require("../../constants/roles");
 
 const admin = roles(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN);
 router.post("/", userAuth, admin, upload.single("logo"), validate(validation.create), controller.create);
+router.get("/admin", userAuth, admin, controller.listAdmin);
 router.get("/", controller.list);
 router.get("/:slug", validate(validation.slugParam), controller.getBySlug);
 router.patch("/:id", userAuth, admin, upload.single("logo"), validate(validation.update), controller.update);

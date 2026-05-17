@@ -465,6 +465,35 @@ Response:
 }
 ```
 
+### List Categories
+
+`GET /api/categories/admin`
+
+Authorization: `admin`, `super_admin`.
+
+Description: Returns categories for CRM management, including inactive categories by default.
+
+Query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `isActive` | No | `true` or `false`. When omitted, active and inactive categories are returned. |
+| `page` | No | Defaults to `1` |
+| `limit` | No | Defaults to `12`, max `100` |
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Categories fetched",
+  "data": {
+    "categories": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
+}
+```
+
 ### Create Category
 
 `POST /api/categories`
@@ -525,6 +554,35 @@ Response:
   "success": true,
   "message": "Category deleted",
   "data": null
+}
+```
+
+### List Brands
+
+`GET /api/brands/admin`
+
+Authorization: `admin`, `super_admin`.
+
+Description: Returns brands for CRM management, including inactive brands by default.
+
+Query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `isActive` | No | `true` or `false`. When omitted, active and inactive brands are returned. |
+| `page` | No | Defaults to `1` |
+| `limit` | No | Defaults to `12`, max `100` |
+
+Response:
+
+```json
+{
+  "success": true,
+  "message": "Brands fetched",
+  "data": {
+    "brands": [],
+    "pagination": { "page": 1, "limit": 12, "total": 0, "pages": 0 }
+  }
 }
 ```
 

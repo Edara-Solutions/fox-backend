@@ -6,6 +6,7 @@ const { uploadBufferToCloudinary } = require("../../config/cloudinary");
 const { paginate } = require("../../utils/pagination");
 
 const imageUrl = async (file) => file && ((await uploadBufferToCloudinary(file.buffer, "supplements/categories"))?.secure_url || undefined);
+const adminFilter = (query) => (query.isActive === undefined ? {} : { isActive: query.isActive === "true" || query.isActive === true });
 
 exports.create = asyncHandler(async (req, res) => {
   const image = await imageUrl(req.file);
@@ -13,6 +14,11 @@ exports.create = asyncHandler(async (req, res) => {
 });
 exports.list = asyncHandler(async (req, res) => {
   const { documents: categories, pagination } = await paginate(Category.find({ isActive: true }).sort("name"), Category.countDocuments({ isActive: true }), req.query);
+  res.json(new ApiResponse("Categories fetched", { categories, pagination }));
+});
+exports.listAdmin = asyncHandler(async (req, res) => {
+  const filter = adminFilter(req.query);
+  const { documents: categories, pagination } = await paginate(Category.find(filter).sort("name"), Category.countDocuments(filter), req.query);
   res.json(new ApiResponse("Categories fetched", { categories, pagination }));
 });
 exports.getBySlug = asyncHandler(async (req, res) => res.json(new ApiResponse("Category fetched", { category: await Category.findOne({ slug: req.params.slug, isActive: true }) })));
