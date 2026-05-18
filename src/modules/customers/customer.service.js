@@ -1,7 +1,18 @@
+const mongoose = require("mongoose");
 const ApiError = require("../../utils/ApiError");
 const Customer = require("./customer.model");
+const Order = require("../orders/order.model");
+const ORDER_STATUS = require("../../constants/orderStatus");
 const generateCustomerToken = require("../../utils/generateCustomerToken");
 const { paginate } = require("../../utils/pagination");
+
+const excludedMetricStatuses = [
+  ORDER_STATUS.PENDING_PAYMENT,
+  ORDER_STATUS.PAYMENT_SUBMITTED,
+  ORDER_STATUS.CANCELLED,
+  ORDER_STATUS.REFUNDED,
+  ORDER_STATUS.PAYMENT_REJECTED,
+];
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -46,6 +57,33 @@ const listAdmin = async (query) => {
   return { customers, pagination };
 };
 
+const getAdmin = async (id) => {
+  const customerId = new mongoose.Types.ObjectId(id);
+  const [customer, metrics] = await Promise.all([
+    Customer.findById(id),
+    Order.aggregate([
+      { $match: { customer: customerId, orderStatus: { $nin: excludedMetricStatuses } } },
+      {
+        $group: {
+          _id: null,
+          totalSpent: { $sum: { $subtract: [{ $ifNull: ["$paid", 0] }, { $ifNull: ["$shippingFee", 0] }] } },
+          totalShippingFee: { $sum: { $ifNull: ["$shippingFee", 0] } },
+          totalOrders: { $sum: 1 },
+        },
+      },
+    ]),
+  ]);
+
+  if (!customer) return customer;
+
+  return {
+    ...customer.toObject(),
+    totalSpent: metrics[0]?.totalSpent || 0,
+    totalShippingFee: metrics[0]?.totalShippingFee || 0,
+    totalOrders: metrics[0]?.totalOrders || 0,
+  };
+};
+
 const changePassword = async (customerId, currentPassword, newPassword) => {
   const customer = await Customer.findById(customerId).select("+password");
   if (!(await customer.comparePassword(currentPassword))) throw new ApiError(400, "Current password is incorrect");
@@ -86,4 +124,4 @@ const setDefaultAddress = async (customer, addressId) => {
   return customer;
 };
 
-module.exports = { register, login, updateMe, listAdmin, changePassword, addAddress, updateAddress, deleteAddress, setDefaultAddress };
+module.exports = { register, login, updateMe, listAdmin, getAdmin, changePassword, addAddress, updateAddress, deleteAddress, setDefaultAddress };

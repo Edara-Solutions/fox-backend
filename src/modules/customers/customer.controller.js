@@ -1,6 +1,5 @@
 const ApiResponse = require("../../utils/ApiResponse");
 const asyncHandler = require("../../utils/asyncHandler");
-const Customer = require("./customer.model");
 const service = require("./customer.service");
 
 exports.register = asyncHandler(async (req, res) => {
@@ -46,7 +45,7 @@ exports.listAdmin = asyncHandler(async (req, res) => {
 });
 
 exports.getAdmin = asyncHandler(async (req, res) => {
-  const customer = await Customer.findById(req.params.id);
+  const customer = await service.getAdmin(req.params.id);
   res.json(new ApiResponse("Customer fetched", { customer }));
 });
 
