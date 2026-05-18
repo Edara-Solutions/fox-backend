@@ -867,7 +867,17 @@ Response:
 {
   "success": true,
   "message": "Customer fetched",
-  "data": { "customer": {} }
+  "data": {
+    "customer": {
+      "_id": "64f000000000000000000001",
+      "fullName": "Customer Name",
+      "email": "customer@example.com",
+      "phone": "01000000000",
+      "totalSpent": 1234,
+      "totalShippingFee": 100,
+      "totalOrders": 5
+    }
+  }
 }
 ```
 
@@ -1020,7 +1030,7 @@ Body:
 Side effects:
 
 - `confirmed`: deducts product stock once, marks payment as `paid`, sets `paid` to `total`, clears `reminder`, and sets `paidAt` / `confirmedAt`.
-- `completed`: deducts product stock if needed, marks payment as `paid`, sets `paid` to `subtotal`, clears `reminder`, and sets `paidAt` / `confirmedAt` / `completedAt`.
+- `completed`: deducts product stock if needed, marks payment as `paid`, sets `paid` to `subtotal + shippingFee`, clears `reminder`, and sets `paidAt` / `confirmedAt` / `completedAt`.
 - `cancelled`: restores product stock if it had been deducted, and sets `cancelledAt`.
 - `refunded`: restores product stock if it had been deducted, marks payment as `refunded`, and sets `refundedAt`.
 - `shipped`: sets `shippedAt`.
