@@ -197,12 +197,12 @@ const updateOrderStatus = async (orderId, orderStatus) => {
   if (orderStatus === ORDER_STATUS.COMPLETED) {
     await deductOrderStock(order);
     order.paymentStatus = PAYMENT_STATUS.PAID;
-    order.paid = order.subtotal;
+    order.paid = order.subtotal + (order.shippingFee || 0);
     order.reminder = 0;
     order.paidAt = order.paidAt || new Date();
     order.confirmedAt = order.confirmedAt || new Date();
     order.completedAt = order.completedAt || new Date();
-    await Payment.findOneAndUpdate({ order: order._id }, { status: PAYMENT_STATUS.PAID, amount: order.subtotal });
+    await Payment.findOneAndUpdate({ order: order._id }, { status: PAYMENT_STATUS.PAID, amount: order.subtotal + (order.shippingFee || 0) });
   }
 
   order.orderStatus = orderStatus;
